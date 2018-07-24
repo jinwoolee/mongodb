@@ -83,3 +83,5 @@ buildNumber.properties
 
 
 # End of https://www.gitignore.io/api/maven,eclipse
+
+/src/main/webapp/META-INF/
