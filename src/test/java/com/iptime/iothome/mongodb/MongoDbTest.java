@@ -44,7 +44,7 @@ public class MongoDbTest {
 		client =  new MongoClient();	//default : localhost : 27017
 		db = client.getDatabase("iot");
 		
-		//initData();
+		initData();
 	}
 	
 	public void initData() {
@@ -55,13 +55,13 @@ public class MongoDbTest {
 		
 		MongoCollection<Document> collection = db.getCollection(testCollection);
 		
-		collection.deleteOne(document);
+		collection.deleteOne(Filters.eq("dev", testDev));
 		collection.insertOne(document);
 	}
 	
 		
-	//@Test
-	public void test() throws UnknownHostException {
+	@Test
+	public void collectioinTest() throws UnknownHostException {
 		/***given***/
 		
 		/***when***/
@@ -104,6 +104,8 @@ public class MongoDbTest {
 			fail("MongoWriteException");
 		}catch(MongoWriteConcernException e){
 			fail("MongoWriteConcernException");
+		}finally{
+			dbc.deleteOne(Filters.eq("dev", testDev));
 		}
 		
 		/***Then***/
@@ -118,7 +120,7 @@ public class MongoDbTest {
 		
 		/***when***/
 		//collection.replaceOne(document);
-		UpdateResult updateResult = collection.updateOne(Filters.eq("_id", testId), Updates.combine(Updates.set("value", 830325 + 1000000)));
+		UpdateResult updateResult = collection.updateOne(Filters.eq("value", testValue), Updates.combine(Updates.set("value", testValue + 1000000)));
 		
 		//FindIterable<Document> documents = collection.find(new Document().append("_id", testId));
 		//Document doc = documents.first();
@@ -142,21 +144,22 @@ public class MongoDbTest {
 		MongoCollection<Document> collection = db.getCollection(testCollection);
 		
 		/***when***/
-		FindIterable<Document> findIterable = collection.find();
-		findIterable.forEach(printBlock);
+		FindIterable<Document> findIterable;
 		
 		logger.debug("{}", "===============eq===============");
-		//collection.find(Filters.eq("_id", testId)).forEach(printBlock);
-		findIterable = collection.find(Filters.eq("_id", testId));
-		findIterable = findIterable.projection(new Document().append("dev", null).append("value", null));
-		//findIterable.forEach(printBlock);
+		findIterable = collection.find(Filters.eq("dev", testDev));
+		
+		//findIterable = findIterable.projection(new Document().append("dev", null).append("value", null));
+		findIterable.forEach(printBlock);
 		
 		//여기서부터 
 		Document doc = findIterable.first();
-		logger.debug("{}", "doc.toString() : " + doc.toJson());
+		logger.debug("{}", "doc.toString() : " + doc);
 		
 		/***then***/
-		assertEquals(testId, doc.get("_id"));
 		assertEquals(testDev, doc.get("dev"));
+		assertEquals(testValue, doc.get("value"));
 	}
+	
+	
 }
